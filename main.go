@@ -3,9 +3,7 @@ package main
 func main() {
 	cards := newDeck()
 
-	cards.print()
+	cards.saveToFile("cards")
 
-	cards.shuffle()
-
-	cards.print()
+	newDeckFromFile("cards.txt").print()
 }

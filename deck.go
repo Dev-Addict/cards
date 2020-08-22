@@ -9,7 +9,22 @@ import (
 	"time"
 )
 
-type deck []string
+type card struct {
+	suit  string
+	value string
+}
+
+func (c card) String() string {
+	return c.value + " of " + c.suit
+}
+
+func cardFromString(c string) card {
+	cSlice := strings.Split(c, " of ")
+
+	return card{suit: cSlice[1], value: cSlice[0]}
+}
+
+type deck []card
 
 func newDeck() deck {
 	cards := deck{}
@@ -19,7 +34,7 @@ func newDeck() deck {
 
 	for _, cardSuit := range cardSuits {
 		for _, cardValue := range cardValues {
-			cards = append(cards, cardValue+" of "+cardSuit)
+			cards = append(cards, card{suit: cardSuit, value: cardValue})
 		}
 	}
 
@@ -36,8 +51,18 @@ func deal(d deck, handSize int) (deck, deck) {
 	return d[:handSize], d[handSize:]
 }
 
+func (d deck) StringSlice() []string {
+	stringSlice := []string{}
+
+	for _, card := range d {
+		stringSlice = append(stringSlice, card.String())
+	}
+
+	return stringSlice
+}
+
 func (d deck) toString() string {
-	return strings.Join([]string(d), ",")
+	return strings.Join(d.StringSlice(), ",")
 }
 
 func (d deck) saveToFile(filename string) error {
@@ -46,11 +71,20 @@ func (d deck) saveToFile(filename string) error {
 
 func newDeckFromFile(filename string) deck {
 	byteSlice, error := ioutil.ReadFile(filename)
+
 	if error != nil {
 		fmt.Println("Error:", error)
 		os.Exit(1)
 	}
-	return deck(strings.Split(string(byteSlice), ","))
+
+	stringSlice := strings.Split(string(byteSlice), ",")
+	d := []card{}
+
+	for _, card := range stringSlice {
+		d = append(d, cardFromString(card))
+	}
+
+	return d
 }
 
 func (d deck) shuffle() {
